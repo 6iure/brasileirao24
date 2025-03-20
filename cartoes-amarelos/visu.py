@@ -1,0 +1,104 @@
+# %%
+import pandas as pd
+pd.plotting.register_matplotlib_converters()
+import matplotlib.pyplot as plt
+import seaborn as sns
+# %%
+
+amarelos_path = '../data/sa25_06_camarelos.parquet'
+
+df_amarelos = pd.read_parquet(amarelos_path)
+df_amarelos
+
+# %%
+
+df_amarelos.info(memory_usage='deep')
+
+# %%
+df_amarelos['jogo'].describe()
+
+# %%
+#Mostra a quantia de amarelos no 1 jogo
+df_amarelos[df_amarelos['jogo'] == 1]
+#* ou df_amarelos.query('jogo == 1')
+
+# %%
+#* trazendo cartoes apenas para jogadores da partida 1
+df_amarelos[df_amarelos['jogo'] == 1] #? como posso passar mais um parametro?
+
+# %%
+jogos_path = '../data/sa25_01_jogos.parquet'
+df_jogos = pd.read_parquet(jogos_path, columns=['competicao', 'comp', 'ano', 'rodada', 'jogo', 'mandante', 'visitante'])
+df_jogos
+
+# %%
+# Fazendo merge entre os DFs jogos e cartoes amarelos
+
+df_merge = df_jogos.merge(df_amarelos,
+                how= 'outer',
+                on=['comp', 'jogo', 'ano']
+)
+
+df_merge.info()
+
+#%%
+df_merge['rodada'] = df_merge['rodada'].astype(int) #* transformando em int a coluna rodada
+
+# %%
+df_merge.groupby('jogo')['mandante'].count()
+
+# %%
+(df_merge
+        .groupby(by='jogo', as_index=False)
+        .agg(amarelo_jogo = ('comp', 'count'))
+)
+
+# %%
+df_merge.jogo.value_counts()
+# %%
+
+df_merge.head()
+
+#%%
+# * Criando df com cartoes amarelos apenas para jogadores (excluindo a comissao tecnica)
+df_aaj = df_merge.dropna(subset=['n_cbf'])
+df_aaj
+
+# %%
+#* amarelos por rodada (APENAS PARA JOGADORES)
+amarelos_rodada_j = df_aaj.groupby(by='rodada', as_index=False).agg(amarelo_rodada_j = ('rodada', 'count'))
+amarelos_rodada_j.head()
+
+# %% 
+# Grafico em linhas usando o SEABORN de amarelo por rodada
+plt.figure(figsize=(16,6))
+plt.xlim(1,38)
+plt.xticks(range(1,39, 1))
+sns.lineplot(data=amarelos_rodada_j, x='rodada', y='amarelo_rodada_j')
+
+# %%
+
+plt.figure(figsize=(16,6))
+plt.xlim(1,38)
+plt.xticks(range(1,39, 1))
+sns.barplot(data=amarelos_rodada_j, x='rodada', y='amarelo_rodada_j')
+# %% 
+# * grafico usando apenas MATPLOTLIB
+
+janela = plt.figure(figsize=(10,5))
+grafico = janela.add_axes([0,0,1,1])
+grafico.bar(amarelos_rodada_j['rodada'], amarelos_rodada_j['amarelo_rodada_j'])
+# %% 
+#* Cartoes amarelos por time (Apenas para jogadores)
+amarelos_time = (df_aaj
+                .groupby(by='time', as_index=False)
+                .agg(amarelos_time = ('time', 'count'))
+                .sort_values('amarelos_time', ascending=True)
+        )
+amarelos_time   
+# %%
+#* grafico em barras de quantos amarelos cada time recebeu (melhorar)
+janela = plt.figure(figsize=(10,5))
+grafico = janela.add_axes([0,0,1,1])
+grafico.bar(amarelos_time['time'], amarelos_time['amarelos_time'])
+plt.xticks(rotation=90)
