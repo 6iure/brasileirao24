@@ -77,7 +77,6 @@ plt.xticks(range(1,39, 1))
 sns.lineplot(data=amarelos_rodada_j, x='rodada', y='amarelo_rodada_j')
 
 # %%
-
 plt.figure(figsize=(16,6))
 plt.xlim(1,38)
 plt.xticks(range(1,39, 1))
@@ -87,7 +86,23 @@ sns.barplot(data=amarelos_rodada_j, x='rodada', y='amarelo_rodada_j')
 
 janela = plt.figure(figsize=(10,5))
 grafico = janela.add_axes([0,0,1,1])
-grafico.bar(amarelos_rodada_j['rodada'], amarelos_rodada_j['amarelo_rodada_j'])
+bars = grafico.bar(amarelos_rodada_j['rodada'], amarelos_rodada_j['amarelo_rodada_j'])
+
+plt.title('Cartoes amarelos por rodada no Brasileirao 2024', fontsize=15, fontweight="bold")
+plt.xlabel('Numero da Rodada')
+plt.ylabel('Quantia de Cartoes')
+
+grafico.set_xlim(0.5, 38.5)  # Margem para melhor visualização
+grafico.set_xticks(range(1, 38, 4))  # Força a exibição de todas as rodadas (1 a 38)
+
+for bar in bars:
+    height = bar.get_height()
+    grafico.annotate(f'{height}',
+                     xy=(bar.get_x() + bar.get_width() / 2, height),  # Posição no topo da barra
+                     xytext=(0, 2),  # Deslocamento vertical do texto (2 pontos para cima)
+                     textcoords="offset points",
+                     ha='center', va='bottom')  # Alinhamento centralizado na base
+plt.show()
 # %% 
 #* Cartoes amarelos por time (Apenas para jogadores)
 amarelos_time = (df_aaj
@@ -102,7 +117,7 @@ janela = plt.figure(figsize=(10,5))
 grafico = janela.add_axes([0,0,1,1])
 bars = grafico.barh(amarelos_time['time'], amarelos_time['amarelos_time'])
 
-plt.title("Cartoes Amarelos por Time no Brasileirao 2024", fontsize=15)
+plt.title("Cartoes Amarelos por Time no Brasileirao 2024", fontsize=15, fontweight="bold")
 plt.xlabel("Quantia de Cartoes")
 plt.ylabel("Times")
 
@@ -133,7 +148,7 @@ janela = plt. figure(figsize=(10, 5))
 grafico = janela.add_axes([0,0,1,1])
 grafico.barh(mais_amarelados['nome_jogador'], mais_amarelados['amarelos_nome'])
 
-plt.title('Jogadores que Mais Receberam Cartoes Amarelos no Brasileirao 2024', fontsize=20)
+plt.title('Jogadores que Mais Receberam Cartoes Amarelos no Brasileirao 2024', fontsize=15, fontweight="bold")
 plt.xlabel('Quantia de Cartoes')
 plt.ylabel('Nome do Jogador')
 
