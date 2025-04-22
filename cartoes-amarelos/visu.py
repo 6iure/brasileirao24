@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 # %%
 
-amarelos_path = '../data/sa25_06_camarelos.parquet'
+amarelos_path = 'data/sa25_06_camarelos.parquet'
 
 df_amarelos = pd.read_parquet(amarelos_path)
 df_amarelos
@@ -27,7 +27,7 @@ df_amarelos[df_amarelos['jogo'] == 1]
 df_amarelos[df_amarelos['jogo'] == 1] #? como posso passar mais um parametro?
 
 # %%
-jogos_path = '../data/sa25_01_jogos.parquet'
+jogos_path = 'data/sa25_01_jogos.parquet'
 df_jogos = pd.read_parquet(jogos_path, columns=['competicao', 'comp', 'ano', 'rodada', 'jogo', 'mandante', 'visitante'])
 df_jogos
 
@@ -97,8 +97,49 @@ amarelos_time = (df_aaj
         )
 amarelos_time   
 # %%
-#* grafico em barras de quantos amarelos cada time recebeu (melhorar)
+#* grafico em barras verticais de quantos amarelos cada time recebeu (deixar mais bonitinho)
 janela = plt.figure(figsize=(10,5))
 grafico = janela.add_axes([0,0,1,1])
-grafico.bar(amarelos_time['time'], amarelos_time['amarelos_time'])
-plt.xticks(rotation=90)
+bars = grafico.barh(amarelos_time['time'], amarelos_time['amarelos_time'])
+
+plt.title("Cartoes Amarelos por Time no Brasileirao 2024", fontsize=15)
+plt.xlabel("Quantia de Cartoes")
+plt.ylabel("Times")
+
+for bar in bars:
+    width = bar.get_width()
+    grafico.annotate(f'{width}',
+                     xy=(width, bar.get_y() + bar.get_height()/2),
+                     xytext=(3, 0),  # Deslocamento do texto
+                     textcoords="offset points",
+                     ha='left', va='center')
+
+plt.show()
+# %%
+#* Filtrando por NOME, quais foram os jogadores mais amarelados
+amarelos_nome = (df_aaj
+                 .groupby(by='nome_jogador', as_index=False)
+                 .agg(amarelos_nome = ('nome_jogador', 'count'))
+                 .sort_values('amarelos_nome', ascending=True)
+                 )
+amarelos_nome
+
+# %%
+mais_amarelados = amarelos_nome.tail(10)
+mais_amarelados
+# %%
+
+janela = plt. figure(figsize=(10, 5))
+grafico = janela.add_axes([0,0,1,1])
+grafico.barh(mais_amarelados['nome_jogador'], mais_amarelados['amarelos_nome'])
+
+plt.title('Jogadores que Mais Receberam Cartoes Amarelos no Brasileirao 2024', fontsize=20)
+plt.xlabel('Quantia de Cartoes')
+plt.ylabel('Nome do Jogador')
+
+plt.show()
+# %%
+# # TODO Comissao tecnica mais indisciplinada 
+# Mostrar por time as comissoes que mais recebem cartoes amarelos
+
+df_merge['n_cbf'].isna()
